@@ -1,320 +1,332 @@
 #include <stdio.h>
-#include <stdbool.h>
-
-#define MAX_PROCESSES 10
-
-struct Process {
-    int pid;
-    int arrival_time;
-    int burst_time;
-    int priority;
-    int remaining_time;
-    int turnaround_time;
-    int waiting_time;
-};
-
-void sjf_nonpreemptive(struct Process processes[], int n) {
-    int i,j,count=0,m;
-    for(i=0;i<n;i++)
-    {
-    if(processes[i].arrival_time==0)
-    count++;
-}
-if(count==n||count==1)
+#include<stdlib.h>
+struct matrix
 {
-if(count==n)
+    int n;
+    int pid[10];
+    int prio[10];
+    int at[10];
+    int bt[10];
+    int tat[10];
+    int wt[10];
+    int ct[10];
+    int btb[10];
+
+}matrix;
+void preemptivesrtf(struct matrix);
+void prioritypreemptive(struct matrix);
+void sjfnonpreemptive(struct matrix);
+void prioritynonpreemptive(struct matrix);
+int clk=0,min,cmin,cnt,k,exe,st=0,sw=0,i,j,ch;
+float n1,avgt,avgw;
+int main()
 {
-for (i = 0; i < n - 1; i++) {
-        for (j = 0; j < n - i - 1; j++) {
-            if (processes[j].burst_time > processes[j + 1].burst_time) {
-                struct Process temp = processes[j];
-                processes[j] = processes[j + 1];
-                processes[j + 1] = temp;
+   struct matrix srtf;
+    printf("Enter no of processes \n");
+   scanf("%d",&srtf.n);
+   printf("Enter in increasing order of AT \n");
+   for(i=1;i<=srtf.n;i++){
+    printf("\nEnter %d process no:",i);
+    scanf("%d",&srtf.pid[i]);
+    printf("\nEnter %d arrival time:",i);
+    scanf("%d",&srtf.at[i]);
+    printf("\nEnter %d burst time :",i);
+    scanf("%d",&srtf.bt[i]);
+    printf("\nEnter %d priority:",i);
+    scanf("%d",&srtf.prio[i]);
+
+}
+for(i=1;i<=srtf.n;i++){
+        srtf.btb[i]=srtf.bt[i];
+    }
+ printf("\n 1.S J F \n2. pre emptive sjf \n 3.priority premptive 4. \n priority non pre emtive \n");
+ printf("Enter your choice:");
+ scanf("%d",&ch);
+ switch(ch)
+ {
+ case 1:
+ 		sjfnonpreemptive(srtf);
+		 break;
+ case 2:
+ 		preemptivesrtf(srtf);
+		 break;
+ case 3:
+ 		prioritypreemptive(srtf);
+  		break;
+ case 4:
+    	prioritynonpreemptive(srtf);
+		break;
+case 5: exit(0); 
+		break;
+default:
+printf("invalid choice");
+ }
+ return 0;
+}
+
+void preemptivesrtf(struct matrix m){
+
+    while(1)
+	{
+        if(clk<m.at[m.n])
+		{
+        for(j=1;j<=m.n;j++)
+		{
+            if(m.at[j]<=clk)
+			{
+                continue;
+            }
+            else
+			{
+                k=j;
+                break;
             }
         }
-    }
-}
-else
-{
-for (i = 1; i < n - 1; i++) {
-        for (j = 1; j <= n - i - 1; j++) {
-            if (processes[j].burst_time > processes[j + 1].burst_time) {
-                struct Process temp = processes[j];
-                processes[j] = processes[j + 1];
-                processes[j + 1] = temp;
+        }
+        else{
+            k=-1;
+        }
+        cmin=0;cnt=0;min=9999;
+        for(i=1;i<=m.n;i++){
+            if(m.at[i]<=clk && m.bt[i]>0){
+            if(m.bt[i]<min){
+                cmin=i;
+                min=m.bt[i];
+                cnt++;
             }
-        }
-    }
-}
-
-   
-}
-
-    int total_time = 0;
-    double total_turnaround_time = 0;
-    double total_waiting_time = 0;
-
-    for (i = 0; i < n; i++) {
-        total_time += processes[i].burst_time;
-        processes[i].turnaround_time = total_time - processes[i].arrival_time;
-        processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
-
-        total_turnaround_time += processes[i].turnaround_time;
-        total_waiting_time += processes[i].waiting_time;
-    }
-
-    printf("Process\tTurnaround Time\tWaiting Time\n");
-    for (i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\n", processes[i].pid, processes[i].turnaround_time, processes[i].waiting_time);
-    }
-
-    printf("Average Turnaround Time: %.2f\n", total_turnaround_time / n);
-    printf("Average Waiting Time: %.2f\n", total_waiting_time / n);
-}
-
-void sjf_preemptive(struct Process processes[], int n) {
-    int total_time = 0,i;
-    int completed = 0;
-
-    while (completed < n) {
-        int shortest_burst = -1;
-        int next_process = -1;
-
-        for (i = 0; i < n; i++) {
-            if (processes[i].arrival_time <= total_time && processes[i].remaining_time > 0) {
-                if (shortest_burst == -1 || processes[i].remaining_time < shortest_burst) {
-                    shortest_burst = processes[i].remaining_time;
-                    next_process = i;
-                }
-            }
-        }
-
-        if (next_process == -1) {
-            total_time++;
-            continue;
-        }
-
-        processes[next_process].remaining_time--;
-        total_time++;
-
-        if (processes[next_process].remaining_time == 0) {
-            completed++;
-            processes[next_process].turnaround_time = total_time - processes[next_process].arrival_time;
-            processes[next_process].waiting_time = processes[next_process].turnaround_time - processes[next_process].burst_time;
-        }
-    }
-
-    double total_turnaround_time = 0;
-    double total_waiting_time = 0;
-
-    printf("Process\tTurnaround Time\tWaiting Time\n");
-    for (i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\n", processes[i].pid, processes[i].turnaround_time, processes[i].waiting_time);
-
-        total_turnaround_time += processes[i].turnaround_time;
-        total_waiting_time += processes[i].waiting_time;
-    }
-
-    printf("Average Turnaround Time: %.2f\n", total_turnaround_time / n);
-    printf("Average Waiting Time: %.2f\n", total_waiting_time / n);
-}
-
-void priority_nonpreemptive(struct Process processes[], int n) {
-    int i,j,count=0,m;
-    for(i=0;i<n;i++)
-    {
-    if(processes[i].arrival_time==0)
-    count++;
-}
-if(count==n||count==1)
-{
-if(count==n)
-{
-for (i = 0; i < n - 1; i++) {
-        for (j = 0; j < n - i - 1; j++) {
-            if (processes[j].priority > processes[j + 1].priority) {
-                struct Process temp = processes[j];
-                processes[j] = processes[j + 1];
-                processes[j + 1] = temp;
-            }
-        }
-    }
-}
-
-else
-{
-    for (i = 1; i < n - 1; i++) {
-        for (j = 1; j <= n - i - 1; j++) {
-            if (processes[j].priority > processes[j + 1].priority) {
-                struct Process temp = processes[j];
-                processes[j] = processes[j + 1];
-                processes[j + 1] = temp;
-            }
-        }
-    }
-}
-}
-
-    int total_time = 0;
-    double total_turnaround_time = 0;
-    double total_waiting_time = 0;
-
-    for (i = 0; i < n; i++) {
-        total_time += processes[i].burst_time;
-        processes[i].turnaround_time = total_time - processes[i].arrival_time;
-        processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
-
-        total_turnaround_time += processes[i].turnaround_time;
-        total_waiting_time += processes[i].waiting_time;
-    }
-
-    printf("Process\tTurnaround Time\tWaiting Time\n");
-    for (i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\n", processes[i].pid, processes[i].turnaround_time, processes[i].waiting_time);
-    }
-
-    printf("Average Turnaround Time: %.2f\n", total_turnaround_time / n);
-    printf("Average Waiting Time: %.2f\n", total_waiting_time / n);
-}
-
-void priority_preemptive(struct Process processes[], int n) {
-    int total_time = 0,i;
-    int completed = 0;
-
-    while (completed < n) {
-        int highest_priority = -1;
-        int next_process = -1;
-
-        for (i = 0; i < n; i++) {
-            if (processes[i].arrival_time <= total_time && processes[i].remaining_time > 0) {
-                if (highest_priority == -1 || processes[i].priority < highest_priority) {
-                    highest_priority = processes[i].priority;
-                    next_process = i;
-                }
             }
         }
 
-        if (next_process == -1) {
-            total_time++;
-            continue;
+        if(cnt>0 && k!=-1)
+		{
+        if(m.bt[cmin]<=(m.at[k]-clk)){
+           exe=m.bt[cmin];
+           printf(" process %d starts %d for %d time units \n",m.pid[cmin],m.at[cmin],exe);
+           clk=clk+m.bt[cmin];
+           m.bt[cmin]=0;
+           m.ct[cmin]=clk;
         }
 
-        processes[next_process].remaining_time--;
-        total_time++;
-
-        if (processes[next_process].remaining_time == 0) {
-            completed++;
-            processes[next_process].turnaround_time = total_time - processes[next_process].arrival_time;
-            processes[next_process].waiting_time = processes[next_process].turnaround_time - processes[next_process].burst_time;
+        else{
+          exe=m.at[k]-clk;
+          clk=clk+exe;
+          m.bt[cmin]-=exe;
+          m.ct[cmin]=clk;
+          printf("process %d starts %d for %d time units \n\n",m.pid[cmin],m.at[cmin],exe);
         }
-    }
-
-    double total_turnaround_time = 0;
-    double total_waiting_time = 0;
-
-    printf("Process\tTurnaround Time\tWaiting Time\n");
-    for (i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\n", processes[i].pid, processes[i].turnaround_time, processes[i].waiting_time);
-
-        total_turnaround_time += processes[i].turnaround_time;
-        total_waiting_time += processes[i].waiting_time;
-    }
-
-    printf("Average Turnaround Time: %.2f\n", total_turnaround_time / n);
-    printf("Average Waiting Time: %.2f\n", total_waiting_time / n);
-}
-
-void round_robin(struct Process processes[], int n, int quantum) {
-    int total_time = 0,i;
-    int completed = 0;
-
-    while (completed < n) {
-        for (i = 0; i < n; i++) {
-            if (processes[i].arrival_time <= total_time && processes[i].remaining_time > 0) {
-                if (processes[i].remaining_time <= quantum) {
-                    total_time += processes[i].remaining_time;
-                    processes[i].remaining_time = 0;
-                    processes[i].turnaround_time = total_time - processes[i].arrival_time;
-                    processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
-                    completed++;
-                } else {
-                    total_time += quantum;
-                    processes[i].remaining_time -= quantum;
-                }
-            }
         }
-    }
 
-    double total_turnaround_time = 0;
-    double total_waiting_time = 0;
+        else if(cnt>0 && k==-1){
+            exe=m.bt[cmin];
+        printf("process %d starts %d for %d time units \n\n",m.pid[cmin],m.at[cmin],exe);
+           clk=clk+m.bt[cmin];
+           m.bt[cmin]=0;
+           m.ct[cmin]=clk;
+        }
 
-    printf("Process\tTurnaround Time\tWaiting Time\n");
-    for (i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\n", processes[i].pid, processes[i].turnaround_time, processes[i].waiting_time);
-
-        total_turnaround_time += processes[i].turnaround_time;
-        total_waiting_time += processes[i].waiting_time;
-    }
-
-    printf("Average Turnaround Time: %.2f\n", total_turnaround_time / n);
-    printf("Average Waiting Time: %.2f\n", total_waiting_time / n);
-}
-
-int main() {
-    int n, quantum,i,choice;
-    struct Process processes[MAX_PROCESSES];
-
-    printf("Enter the number of processes: ");
-    scanf("%d", &n);
-
-    for (i = 0; i < n; i++) {
-        printf("Process %d\n", i + 1);
-        printf("Enter arrival time: ");
-        scanf("%d", &processes[i].arrival_time);
-        printf("Enter burst time: ");
-        scanf("%d", &processes[i].burst_time);
-        printf("Enter priority: ");
-        scanf("%d", &processes[i].priority);
-        processes[i].pid = i + 1;
-        processes[i].remaining_time = processes[i].burst_time;
-        processes[i].turnaround_time = 0;
-        processes[i].waiting_time = 0;
-    }
-    printf("\nSelect a scheduling algorithm:\n");
-    printf("1. SJF Non-preemptive\n");
-    printf("2. SJF Preemptive\n");
-    printf("3. Priority Non-preemptive\n");
-    printf("4. Priority Preemptive\n");
-    printf("5. Round Robin\n");
-    printf("Enter your choice: ");
-    scanf("%d", &choice);
-
-    switch (choice) {
-        case 1:
-            printf("\nSJF Non-preemptive Scheduling:\n");
-            sjf_nonpreemptive(processes, n);
+        else{
             break;
-        case 2:
-            printf("\nSJF Preemptive Scheduling:\n");
-            sjf_preemptive(processes, n);
-            break;
-        case 3:
-            printf("\nPriority Non-preemptive Scheduling:\n");
-            priority_nonpreemptive(processes, n);
-            break;
-        case 4:
-            printf("\nPriority Preemptive Scheduling:\n");
-            priority_preemptive(processes, n);
-            break;
-        case 5:
-            printf("\nEnter the quantum size for Round Robin: ");
-            scanf("%d", &quantum);
-            printf("\nRound Robin Scheduling (Quantum: %d):\n", quantum);
-            round_robin(processes, n, quantum);
-            break;
-        default:
-            printf("Invalid choice!\n");
-            return 1;
+        }
+
     }
-    return 0;
+
+    for(i=1;i<=m.n;i++){
+        m.tat[i]=m.ct[i]-m.at[i];
+        m.wt[i]=m.tat[i]-m.btb[i];
+    }
+    printf("Process\tTurnaround Time\tWaiting Time\n");
+    for(i=1;i<=m.n;i++){
+    st+=m.tat[i];
+    sw+=m.wt[i];
+    printf("%d\t%d\t\t%d\n", m.pid[i], m.tat[i], m.wt[i]);
+    }
+
+    n1=m.n;
+    avgt=st/n1;
+    avgw=sw/n1;
+    printf("Avg TAT= %f \n",avgt);
+    printf("Avg WT= %f \n ",avgw);
+
+}
+
+void prioritypreemptive(struct matrix m)
+{
+    while(1)
+	{
+       if(clk<m.at[m.n])
+	   {
+        for(j=1;j<=m.n;j++)
+		{
+            if(m.at[j]<=clk)
+			{
+                continue;
+            }
+            else
+			{
+                k=j;
+                break;
+            }
+        }
+    	}
+        else
+		{
+            k=-1;
+        }
+
+        cmin=0;
+		cnt=0;
+		min=9999;
+        for(i=1;i<=m.n;i++)
+		{
+            if(m.at[i]<=clk && m.bt[i]>0)
+			{
+            if(m.prio[i]<min)
+			{
+                cmin=i;
+                min=m.prio[i];
+                cnt++;
+            }
+            }
+        }
+
+        if(cnt>0 && k!=-1)
+		{
+        if(m.bt[cmin]<=(m.at[k]-clk))
+		{
+           exe=m.bt[cmin];
+           printf("Executed process %d with AT %d for BT %d \n",m.pid[cmin],m.at[cmin],exe);
+           clk=clk+m.bt[cmin];
+           m.bt[cmin]=0;
+           m.ct[cmin]=clk;
+        }
+
+        else
+		{
+          exe=m.at[k]-clk;
+          clk=clk+exe;
+          m.bt[cmin]-=exe;
+          m.ct[cmin]=clk;
+          printf("Executed process %d with AT %d for BT %d \n",m.pid[cmin],m.at[cmin],exe);
+        }
+        }
+
+        else if(cnt>0 && k==-1)
+		{
+            exe=m.bt[cmin];
+        	printf("Executed process %d with AT %d for BT %d \n",m.pid[cmin],m.at[cmin],exe);
+            clk=clk+m.bt[cmin];
+            m.bt[cmin]=0;
+            m.ct[cmin]=clk;
+        }
+
+        else
+		{
+            break;
+        }
+    }
+    printf("Process\tTurnaround Time\tWaiting Time\n");
+    for(i=1;i<=m.n;i++){
+        m.tat[i]=m.ct[i]-m.at[i];
+        m.wt[i]=m.tat[i]-m.btb[i];
+        printf("%d\t%d\t\t%d\n", m.pid[i], m.tat[i], m.wt[i]);
+    }
+    for(i=1;i<=m.n;i++){
+    st+=m.tat[i];
+    sw+=m.wt[i];
+    }
+    n1=m.n;
+    avgt=st/n1;
+    avgw=sw/n1;
+    printf("Avg TAT for Priority preemptive= %f \n",avgt);
+    printf("Avg WT for Priority preemptive= %f \n ",avgw);
+
+}
+
+void sjfnonpreemptive(struct matrix m){
+    while(1){
+        cmin=0;cnt=0;min=9999;
+        for(i=1;i<=m.n;i++)
+		{
+            if(m.at[i]<=clk && m.bt[i]>0)
+			{
+            if(m.bt[i]<min)
+			{
+                cmin=i;
+                min=m.bt[i];
+                cnt++;
+            }
+            }
+        }
+
+        if(cnt>0){ 
+            exe=m.bt[cmin];
+            clk=clk+m.bt[cmin];
+            m.bt[cmin]=0;
+            m.ct[cmin]=clk;
+            printf("Executed process %d with AT %d for BT %d \n",m.pid[cmin],m.at[cmin],exe);
+        }
+        else{
+            break;
+        }
+
+}
+ printf("Process\tTurnaround Time\tWaiting Time\n");
+ for(i=1;i<=m.n;i++){
+        m.tat[i]=m.ct[i]-m.at[i];
+        m.wt[i]=m.tat[i]-m.btb[i];
+        printf("%d\t%d\t\t%d\n", m.pid[i], m.tat[i], m.wt[i]);
+    }
+    for(i=1;i<=m.n;i++){
+    st+=m.tat[i];
+    sw+=m.wt[i];
+    }
+    n1=m.n;
+    avgt=st/n1;
+    avgw=sw/n1;
+    printf("Avg TAT for SJF non-preemptive= %f \n",avgt);
+    printf("Avg WT for SJF non-preemptive= %f \n ",avgw);
+
+
+}
+
+void prioritynonpreemptive(struct matrix m){
+    while(1){
+    cmin=0;cnt=0;min=9999;
+    for(i=1;i<=m.n;i++){
+            if(m.at[i]<=clk && m.bt[i]>0){ 
+            if(m.prio[i]<min){
+                cmin=i;
+                min=m.prio[i];
+                cnt++;
+            }
+            }
+        }
+
+     if(cnt>0){ 
+            exe=m.bt[cmin];
+            clk=clk+m.bt[cmin];
+            m.bt[cmin]=0;
+            m.ct[cmin]=clk;
+            printf("Executed process %d with AT %d for BT %d \n",m.pid[cmin],m.at[cmin],exe);
+        }
+        else{ 
+            break;
+        }
+}
+ printf("Process\tTurnaround Time\tWaiting Time\n");
+for(i=1;i<=m.n;i++){
+        m.tat[i]=m.ct[i]-m.at[i];
+        m.wt[i]=m.tat[i]-m.btb[i];
+        printf("%d\t%d\t\t%d\n", m.pid[i], m.tat[i], m.wt[i]);
+    }
+    for(i=1;i<=m.n;i++){
+    st+=m.tat[i];
+    sw+=m.wt[i];
+    }
+    n1=m.n;
+    avgt=st/n1;
+    avgw=sw/n1;
+    printf("Avg TAT for Priority non-preemptive= %f \n",avgt);
+    printf("Avg WT for Priority non-preemptive= %f \n ",avgw);
+
 }
